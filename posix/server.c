@@ -2,19 +2,28 @@
 #include <sys/socket.h>
 #include <string.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include <unistd.h> // Used for universal read/write fd (recv(socket.h) would work otherwise)
 #include <netinet/in.h>
 
 int const MAX_BACKLOG = 5;
+
+static volatile sig_atomic_t keep_running = 1;
 
 void error(const char *msg) {
   perror(msg);
   exit(1);
 }
 
+static void sig_handler(int _)
+{
+  (void)_;
+  keep_running = 0;
+}
+
 int main(int argc, char *argv[1]) {
   if (argc < 2) {
     fprintf(stderr, "Port No not provided. Program terminated\n");
+    return 1;
   }
 
   int sockfd, newsockfd, portno;
@@ -40,7 +49,7 @@ int main(int argc, char *argv[1]) {
   portno = atoi(argv[1]);
 
   serv_addr.sin_family = AF_INET;
-  serv_addr.sin_addr.s_addr = INADDR_ANY;
+  serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
   serv_addr.sin_port = htons(portno);
 
   if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
@@ -65,7 +74,7 @@ int main(int argc, char *argv[1]) {
     printf("Accepted Client!\n");
   }
   
-  while (1) {
+  while (keep_running) {
     bzero(buffer, 255);
     err = read(newsockfd, buffer, 255);
 
@@ -73,6 +82,7 @@ int main(int argc, char *argv[1]) {
       error("Error on Read");
     }
     printf("Client : %s\n", buffer);
+
     bzero(buffer, 255);
     fgets(buffer, 255, stdin);
 
@@ -81,7 +91,7 @@ int main(int argc, char *argv[1]) {
       error("Error on Write");
     }
 
-    int i = strcmp("Bye", buffer);
+    int i = strcmp("Bye\n", buffer);
     if (i == 0) {
       break;
     }

@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
       error("Error on Read");
     }
 
-    int i = strcmp("Bye", buffer);
+    int i = strcmp("Bye\n", buffer);
     if (i == 0) {
       break;
     }
