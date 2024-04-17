@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <sys/socket.h>
 #include <string.h>
+#include <strings.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <netdb.h>
@@ -36,7 +37,7 @@ int main(int argc, char *argv[]) {
 
   bzero((char *) &serv_addr, sizeof(serv_addr));
   serv_addr.sin_family = AF_INET;
-  bcopy((char *) server->h_addr, (char *) &serv_addr.sin_addr.s_addr, server->h_length);
+  bcopy((char *) server->h_addr_list[0], (char *) &serv_addr.sin_addr.s_addr, server->h_length);
   serv_addr.sin_port = htons(portno);
 
   err = connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
