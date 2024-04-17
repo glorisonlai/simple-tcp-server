@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <unistd.h> // Used for universal read/write fd (recv(socket.h) would work otherwise)
 #include <netinet/in.h>
+#include <signal.h>
 
 int const MAX_BACKLOG = 5;
 
